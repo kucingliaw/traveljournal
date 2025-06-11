@@ -1,0 +1,56 @@
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+class AuthService {
+  final SupabaseClient _supabase = Supabase.instance.client;
+
+  // Sign in with email and password
+  Future<AuthResponse> signInWithEmailPassword(
+    String email,
+    String password,
+  ) async {
+    try {
+      final response = await _supabase.auth.signInWithPassword(
+        email: email,
+        password: password,
+      );
+      return response;
+    } catch (e) {
+      throw Exception('Failed to sign in: $e');
+    }
+  }
+
+  // Sign up with email and password
+  Future<AuthResponse> signUpWithEmailPassword(
+    String email,
+    String password,
+  ) async {
+    try {
+      final response = await _supabase.auth.signUp(
+        email: email,
+        password: password,
+      );
+      return response;
+    } catch (e) {
+      throw Exception('Failed to sign up: $e');
+    }
+  }
+
+  // Sign out
+  Future<void> signOut() async {
+    try {
+      await _supabase.auth.signOut();
+    } catch (e) {
+      throw Exception('Failed to sign out: $e');
+    }
+  }
+
+  // Get current user
+  Future<User?> getCurrentUser() async {
+    try {
+      final session = _supabase.auth.currentSession;
+      return session?.user;
+    } catch (e) {
+      throw Exception('Failed to get current user: $e');
+    }
+  }
+}

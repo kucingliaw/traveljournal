@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:traveljournal/screen/homescreen.dart';
+import 'package:traveljournal/auth/auth_gate.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -23,12 +23,12 @@ class _SplashScreenState extends State<SplashScreen>
     _animation = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
 
     _controller.forward();
-
     Future.delayed(const Duration(milliseconds: 1500), () {
+      if (!mounted) return;
       Navigator.pushReplacement(
         context,
         PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) => HomeScreen(),
+          pageBuilder: (context, animation, secondaryAnimation) => AuthGate(),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return FadeTransition(opacity: animation, child: child);
           },

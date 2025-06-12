@@ -1,36 +1,61 @@
 import 'package:flutter/material.dart';
 import 'package:traveljournal/auth/auth_service.dart';
-import 'package:traveljournal/screen/signup_screen.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class SignUpScreen extends StatefulWidget {
+  const SignUpScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<SignUpScreen> createState() => _SignUpScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _SignUpScreenState extends State<SignUpScreen> {
   // Get Auth service
   final authService = AuthService();
 
   // Controllers for email and password input
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
 
-  // Login button handler
-  void login() async {
+  // Sign up button handler
+  void signUp() async {
     final email = _emailController.text;
     final password = _passwordController.text;
+    final confirmPassword = _confirmPasswordController.text;
 
-    // Attempt to sign in with email and password
-    try {
-      await authService.signInWithEmailPassword(email, password);
-    } catch (e) {
-      // Handle login error
+    // Check if passwords match
+    if (password != confirmPassword) {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Login failed: $e')));
+        ).showSnackBar(const SnackBar(content: Text('Passwords do not match')));
+      }
+      return;
+    } // Attempt to sign up with email and password
+    try {
+      await authService.signUpWithEmailPassword(email, password);
+      if (mounted) {
+        // Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Account created successfully! Please login.'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        // Navigate back to login screen after a short delay
+        Future.delayed(const Duration(seconds: 2), () {
+          Navigator.pop(context); // Go back to login screen
+        });
+      }
+    } catch (e) {
+      // Handle sign up error
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Sign up failed: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     }
   }
@@ -38,6 +63,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 400),
@@ -47,9 +73,9 @@ class _LoginScreenState extends State<LoginScreen> {
               vertical: 16.0,
             ),
             children: [
-              const SizedBox(height: 300), // Menambah jarak dari atas
+              const SizedBox(height: 50),
               Text(
-                'Login',
+                'Create Account',
                 style: Theme.of(context).textTheme.headlineMedium,
                 textAlign: TextAlign.center,
               ),
@@ -57,6 +83,7 @@ class _LoginScreenState extends State<LoginScreen> {
               TextField(
                 controller: _emailController,
                 decoration: const InputDecoration(labelText: 'Email'),
+                keyboardType: TextInputType.emailAddress,
               ),
               const SizedBox(height: 16),
               TextField(
@@ -64,15 +91,23 @@ class _LoginScreenState extends State<LoginScreen> {
                 obscureText: true,
                 decoration: const InputDecoration(labelText: 'Password'),
               ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _confirmPasswordController,
+                obscureText: true,
+                decoration: const InputDecoration(
+                  labelText: 'Confirm Password',
+                ),
+              ),
               const SizedBox(height: 50),
               ElevatedButton(
-                onPressed: login,
+                onPressed: signUp,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF1E201E),
                   padding: const EdgeInsets.symmetric(vertical: 15),
                 ),
                 child: Text(
-                  'Login',
+                  'Sign Up',
                   style: Theme.of(
                     context,
                   ).textTheme.labelLarge?.copyWith(color: Colors.white),
@@ -83,20 +118,15 @@ class _LoginScreenState extends State<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    "Don't have an account? ",
+                    "Already have an account? ",
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                   GestureDetector(
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const SignUpScreen(),
-                        ),
-                      );
+                      Navigator.pop(context);
                     },
                     child: Text(
-                      "Sign up",
+                      "Login",
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Theme.of(context).colorScheme.primary,
                         fontWeight: FontWeight.bold,

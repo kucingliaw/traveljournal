@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -21,8 +20,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Center(
         child: Text(
           'Home Screen',
-          style: GoogleFonts.poppins(
-            fontSize: 24,
+          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
             color: Colors.black,
             decoration: TextDecoration.none,
           ),

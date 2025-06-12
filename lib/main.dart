@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:traveljournal/screen/splashscreen.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 void main() async {
   // Supabase initialization
@@ -22,6 +23,17 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Travel Journal',
       debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        // Set Poppins as the default font family
+        textTheme: GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme),
+        // You can also set specific styles for different text types
+        primaryTextTheme: GoogleFonts.poppinsTextTheme(
+          Theme.of(context).primaryTextTheme,
+        ),
+        // Optional: Set other theme properties
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF1E201E)),
+        useMaterial3: true,
+      ),
       home: SplashScreen(),
     );
   }

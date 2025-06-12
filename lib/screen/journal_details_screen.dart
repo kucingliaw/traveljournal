@@ -85,17 +85,38 @@ class _JournalDetailsScreenState extends State<JournalDetailsScreen> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: const Text('Journal Details'),
+        toolbarHeight: kToolbarHeight + 24,
+        centerTitle: true,
+        leading: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12.0),
+          child: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ),
+        title: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12.0),
+          child: const Text('Journal Details'),
+        ),
         actions: [
-          IconButton(onPressed: _editJournal, icon: const Icon(Icons.edit)),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12.0),
+            child: IconButton(
+              onPressed: _editJournal,
+              icon: const Icon(Icons.edit),
+            ),
+          ),
           if (!_isDeleting)
-            IconButton(
-              onPressed: _deleteJournal,
-              icon: const Icon(Icons.delete),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12.0),
+              child: IconButton(
+                onPressed: _deleteJournal,
+                icon: const Icon(Icons.delete),
+              ),
             )
           else
-            const Padding(
-              padding: EdgeInsets.all(8.0),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12.0),
               child: SizedBox(
                 width: 24,
                 height: 24,

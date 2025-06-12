@@ -35,6 +35,16 @@ class AuthService {
         email: email,
         password: password,
       );
+
+      if (response.user != null) {
+        // Create initial profile
+        await _supabase.from('profiles').insert({
+          'id': response.user!.id,
+          'email': email,
+          'updated_at': DateTime.now().toIso8601String(),
+        });
+      }
+
       // Sign out immediately to prevent auto-login
       await _supabase.auth.signOut();
       return response;

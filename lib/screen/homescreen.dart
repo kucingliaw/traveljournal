@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:traveljournal/auth/auth_service.dart';
-import 'package:traveljournal/screen/login_screen.dart';
+import 'package:traveljournal/widgets/custom_app_bar.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -28,74 +28,18 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void _handleLogout() async {
-    try {
-      await _authService.signOut();
-      if (mounted) {
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => const LoginScreen()),
-          (route) => false,
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error logging out: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: CircleAvatar(
-            backgroundColor: Colors.grey[200],
-            child: const Icon(Icons.person, color: Colors.grey),
+      backgroundColor: Colors.white,
+      appBar: CustomAppBar(userEmail: _userEmail, authService: _authService),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10.0),
+        child: Center(
+          child: Text(
+            'Welcome to Travel Journal',
+            style: Theme.of(context).textTheme.headlineMedium,
           ),
-        ),
-        title: Text(
-          'Hi, ${_userEmail.split('@')[0]}',
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
-        actions: [
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.menu),
-            onSelected: (value) {
-              if (value == 'logout') {
-                _handleLogout();
-              }
-            },
-            itemBuilder: (BuildContext context) => [
-              PopupMenuItem<String>(
-                value: 'logout',
-                child: Row(
-                  children: [
-                    const Icon(Icons.logout, size: 20),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Logout',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-      body: Center(
-        child: Text(
-          'Welcome to Travel Journal',
-          style: Theme.of(context).textTheme.headlineMedium,
         ),
       ),
     );

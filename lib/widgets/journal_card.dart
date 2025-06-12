@@ -13,6 +13,8 @@ class JournalCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      color: Colors.white,
+      elevation: 2,
       child: InkWell(
         onTap: onTap,
         child: Column(

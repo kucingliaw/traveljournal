@@ -74,10 +74,12 @@ class _LoginScreenState extends State<LoginScreen> {
               vertical: 16.0,
             ),
             children: [
-              const SizedBox(height: 300), // Menambah jarak dari atas
+              const SizedBox(height: 200), // Menambah jarak dari atas
               Text(
                 'Login',
-                style: Theme.of(context).textTheme.headlineMedium,
+                style: Theme.of(
+                  context,
+                ).textTheme.headlineSmall?.copyWith(fontSize: 24),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 50),
@@ -92,19 +94,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 decoration: const InputDecoration(labelText: 'Password'),
               ),
               const SizedBox(height: 50),
-              ElevatedButton(
-                onPressed: login,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1E201E),
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                ),
-                child: Text(
-                  'Login',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.labelLarge?.copyWith(color: Colors.white),
-                ),
-              ),
+              ElevatedButton(onPressed: login, child: const Text('Login')),
               const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,

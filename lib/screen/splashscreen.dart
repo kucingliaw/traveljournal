@@ -23,7 +23,7 @@ class _SplashScreenState extends State<SplashScreen>
     _animation = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
 
     _controller.forward();
-    Future.delayed(const Duration(milliseconds: 1500), () {
+    Future.delayed(const Duration(milliseconds: 3000), () {
       if (!mounted) return;
       Navigator.pushReplacement(
         context,
@@ -54,10 +54,37 @@ class _SplashScreenState extends State<SplashScreen>
       child: Center(
         child: FadeTransition(
           opacity: _animation,
-          child: Image.asset(
-            'assets/images/logo.png',
-            width: size.width - 150,
-            height: size.height - 150,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(
+                height: size.width - 150,
+                child: Image.asset(
+                  'assets/images/logo.png',
+                  width: size.width - 150,
+                  fit: BoxFit.contain,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Travel Journal',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                  color: const Color(0xFF1E201E),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Capture your journey,\nOne memory at a time',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: Colors.grey[700],
+                  height: 1.5,
+                ),
+              ),
+            ],
           ),
         ),
       ),

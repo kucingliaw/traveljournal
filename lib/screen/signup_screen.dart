@@ -117,19 +117,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ),
               ),
               const SizedBox(height: 50),
-              ElevatedButton(
-                onPressed: signUp,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1E201E),
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                ),
-                child: Text(
-                  'Sign Up',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.labelLarge?.copyWith(color: Colors.white),
-                ),
-              ),
+              ElevatedButton(onPressed: signUp, child: const Text('Sign Up')),
               const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,

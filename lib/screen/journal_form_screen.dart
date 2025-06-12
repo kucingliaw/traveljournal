@@ -4,9 +4,12 @@ import 'package:image_picker/image_picker.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:traveljournal/services/journal_service.dart';
+import 'package:traveljournal/models/journal.dart';
 
 class JournalFormScreen extends StatefulWidget {
-  const JournalFormScreen({super.key});
+  final Journal? journal; // If provided, we're editing an existing journal
+
+  const JournalFormScreen({super.key, this.journal});
 
   @override
   State<JournalFormScreen> createState() => _JournalFormScreenState();
@@ -17,16 +20,43 @@ class _JournalFormScreenState extends State<JournalFormScreen> {
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
   String? _imagePath;
+  String? _currentImageUrl; // For existing image
   String? _locationName;
   double? _latitude;
   double? _longitude;
   bool _isLoading = false;
   final _journalService = JournalService();
 
+  @override
+  void initState() {
+    super.initState();
+    if (widget.journal != null) {
+      // We're editing an existing journal
+      _titleController.text = widget.journal!.title;
+      _contentController.text = widget.journal!.content;
+      _currentImageUrl = widget.journal!.imageUrl;
+      _locationName = widget.journal!.locationName;
+      _latitude = widget.journal!.latitude;
+      _longitude = widget.journal!.longitude;
+    }
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _contentController.dispose();
+    super.dispose();
+  }
+
   Future<void> _pickImage() async {
     try {
       final ImagePicker picker = ImagePicker();
-      final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+      final XFile? image = await picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1920,
+        maxHeight: 1080,
+        imageQuality: 85,
+      );
 
       if (image != null) {
         setState(() {
@@ -34,12 +64,14 @@ class _JournalFormScreenState extends State<JournalFormScreen> {
         });
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to pick image: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to pick image: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -49,13 +81,15 @@ class _JournalFormScreenState extends State<JournalFormScreen> {
 
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Location services are disabled. Please enable the services',
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Location services are disabled. Please enable the services',
+            ),
           ),
-        ),
-      );
+        );
+      }
       return false;
     }
 
@@ -63,19 +97,23 @@ class _JournalFormScreenState extends State<JournalFormScreen> {
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Location permissions are denied')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Location permissions are denied')),
+          );
+        }
         return false;
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Location permissions are permanently denied'),
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Location permissions are permanently denied'),
+          ),
+        );
+      }
       return false;
     }
 
@@ -96,7 +134,7 @@ class _JournalFormScreenState extends State<JournalFormScreen> {
         position.longitude,
       );
 
-      if (placemarks.isNotEmpty) {
+      if (placemarks.isNotEmpty && mounted) {
         final place = placemarks[0];
         final locationName = [
           place.locality,
@@ -111,12 +149,14 @@ class _JournalFormScreenState extends State<JournalFormScreen> {
         });
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to get location: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to get location: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -126,16 +166,41 @@ class _JournalFormScreenState extends State<JournalFormScreen> {
     setState(() => _isLoading = true);
 
     try {
-      await _journalService.createJournal(
-        title: _titleController.text,
-        content: _contentController.text,
-        imagePath: _imagePath,
-        locationName: _locationName,
-        latitude: _latitude,
-        longitude: _longitude,
-      );
+      if (widget.journal != null) {
+        // Update existing journal
+        await _journalService.updateJournal(
+          id: widget.journal!.id,
+          title: _titleController.text,
+          content: _contentController.text,
+          imagePath: _imagePath,
+          currentImageUrl: _currentImageUrl,
+          locationName: _locationName,
+          latitude: _latitude,
+          longitude: _longitude,
+        );
+      } else {
+        // Create new journal
+        await _journalService.createJournal(
+          title: _titleController.text,
+          content: _contentController.text,
+          imagePath: _imagePath,
+          locationName: _locationName,
+          latitude: _latitude,
+          longitude: _longitude,
+        );
+      }
 
       if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              widget.journal == null
+                  ? 'Journal created successfully!'
+                  : 'Journal updated successfully!',
+            ),
+            backgroundColor: Colors.green,
+          ),
+        );
         Navigator.pop(context, true); // Return true to indicate success
       }
     } catch (e) {
@@ -155,16 +220,15 @@ class _JournalFormScreenState extends State<JournalFormScreen> {
   }
 
   @override
-  void dispose() {
-    _titleController.dispose();
-    _contentController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('New Journal Entry')),
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        title: Text(
+          widget.journal == null ? 'New Journal Entry' : 'Edit Journal Entry',
+        ),
+      ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
@@ -208,7 +272,9 @@ class _JournalFormScreenState extends State<JournalFormScreen> {
                       onPressed: _pickImage,
                       icon: const Icon(Icons.photo),
                       label: Text(
-                        _imagePath == null ? 'Add Photo' : 'Change Photo',
+                        _imagePath == null && _currentImageUrl == null
+                            ? 'Add Photo'
+                            : 'Change Photo',
                       ),
                     ),
                     if (_imagePath != null) ...[
@@ -217,6 +283,17 @@ class _JournalFormScreenState extends State<JournalFormScreen> {
                         borderRadius: BorderRadius.circular(8),
                         child: Image.file(
                           File(_imagePath!),
+                          height: 200,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ] else if (_currentImageUrl != null) ...[
+                      const SizedBox(height: 8),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.network(
+                          _currentImageUrl!,
                           height: 200,
                           width: double.infinity,
                           fit: BoxFit.cover,
@@ -244,9 +321,13 @@ class _JournalFormScreenState extends State<JournalFormScreen> {
                     const SizedBox(height: 24),
                     FilledButton(
                       onPressed: _saveJournal,
-                      child: const Padding(
-                        padding: EdgeInsets.all(16),
-                        child: Text('Save Journal'),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Text(
+                          widget.journal == null
+                              ? 'Create Journal'
+                              : 'Update Journal',
+                        ),
                       ),
                     ),
                   ],

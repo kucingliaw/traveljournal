@@ -4,6 +4,7 @@ import 'package:traveljournal/models/journal.dart';
 import 'package:traveljournal/services/journal_service.dart';
 import 'package:traveljournal/widgets/custom_app_bar.dart';
 import 'package:traveljournal/widgets/journal_card.dart';
+import 'package:traveljournal/screen/journal_details_screen.dart';
 import 'package:traveljournal/screen/journal_form_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -71,9 +72,17 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void _viewJournalDetails(Journal journal) {
-    // TODO: Implement journal details screen
-    // Will be implemented in the next step
+  void _viewJournalDetails(Journal journal) async {
+    final needsRefresh = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => JournalDetailsScreen(journal: journal),
+      ),
+    );
+
+    if (needsRefresh == true && mounted) {
+      _loadJournals();
+    }
   }
 
   @override
@@ -119,6 +128,8 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
       floatingActionButton: FloatingActionButton(
         onPressed: _createNewJournal,
+        backgroundColor: const Color(0xFF1E201E),
+        foregroundColor: Colors.white,
         child: const Icon(Icons.add),
       ),
     );

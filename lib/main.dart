@@ -4,6 +4,7 @@ import 'package:traveljournal/screen/splashscreen.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   // Supabase initialization
   await Supabase.initialize(
     url: 'https://wynhgeabjnkycotojqqs.supabase.co',
@@ -30,8 +31,28 @@ class MyApp extends StatelessWidget {
         primaryTextTheme: GoogleFonts.poppinsTextTheme(
           Theme.of(context).primaryTextTheme,
         ),
-        // Optional: Set other theme properties
+        // Set color scheme and button themes
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF1E201E)),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF1E201E),
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(vertical: 15),
+          ),
+        ),
+        filledButtonTheme: FilledButtonThemeData(
+          style: FilledButton.styleFrom(
+            backgroundColor: const Color(0xFF1E201E),
+            foregroundColor: Colors.white,
+          ),
+        ),
+        floatingActionButtonTheme: FloatingActionButtonThemeData(
+          backgroundColor: const Color(0xFF1E201E),
+          foregroundColor: Colors.white,
+        ),
+        iconButtonTheme: IconButtonThemeData(
+          style: IconButton.styleFrom(foregroundColor: const Color(0xFF1E201E)),
+        ),
         useMaterial3: true,
       ),
       home: SplashScreen(),

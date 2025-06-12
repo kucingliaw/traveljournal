@@ -78,51 +78,6 @@ class _JournalFormScreenState extends State<JournalFormScreen> {
     }
   }
 
-  Future<bool> _handleLocationPermission() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Location services are disabled. Please enable the services',
-            ),
-          ),
-        );
-      }
-      return false;
-    }
-
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Location permissions are denied')),
-          );
-        }
-        return false;
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Location permissions are permanently denied'),
-          ),
-        );
-      }
-      return false;
-    }
-
-    return true;
-  }
-
   Future<void> _getCurrentLocation() async {
     final position = await LocationService.getCurrentLocation(context);
     if (position == null) return;

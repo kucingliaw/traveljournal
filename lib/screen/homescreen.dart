@@ -6,6 +6,7 @@ import 'package:traveljournal/widgets/custom_app_bar.dart';
 import 'package:traveljournal/widgets/journal_card.dart';
 import 'package:traveljournal/screen/journal_details_screen.dart';
 import 'package:traveljournal/screen/journal_form_screen.dart';
+import 'package:traveljournal/widgets/refreshable_view.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -20,6 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String _userEmail = '';
   List<Journal> _journals = [];
   bool _isLoading = true;
+  String? _error;
 
   @override
   void initState() {
@@ -29,35 +31,42 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadUserData() async {
-    final user = await _authService.getCurrentUser();
-    if (user != null && mounted) {
-      setState(() {
-        _userEmail = user.email ?? '';
-      });
+    try {
+      final user = await _authService.getCurrentUser();
+      if (user != null && mounted) {
+        setState(() {
+          _userEmail = user.email ?? '';
+        });
+      }
+    } catch (e) {
+      // Non-critical error, just log it
+      print('Error loading user data: $e');
     }
   }
 
   Future<void> _loadJournals() async {
+    if (!mounted) return;
+
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
     try {
       final journals = await _journalService.getJournals();
-      if (mounted) {
-        setState(() {
-          _journals = journals;
-          _isLoading = false;
-        });
-      }
+      if (!mounted) return;
+
+      setState(() {
+        _journals = journals;
+        _isLoading = false;
+      });
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to load journals: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-        setState(() {
-          _isLoading = false;
-        });
-      }
+      if (!mounted) return;
+
+      setState(() {
+        _error = 'Failed to load journals: $e';
+        _isLoading = false;
+      });
     }
   }
 
@@ -90,42 +99,29 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: CustomAppBar(userEmail: _userEmail, authService: _authService),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _journals.isEmpty
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'No journals yet',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Create your first travel memory!',
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                ],
+      body: RefreshableView(
+        onRefresh: _loadJournals,
+        isLoading: _isLoading,
+        errorMessage: _error,
+        emptyMessage: _journals.isEmpty
+            ? 'Start your journey by creating your first travel memory!'
+            : null,
+        onRetry: _loadJournals,
+        builder: (context) => ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: _journals.length,
+          itemBuilder: (context, index) {
+            final journal = _journals[index];
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: JournalCard(
+                journal: journal,
+                onTap: () => _viewJournalDetails(journal),
               ),
-            )
-          : RefreshIndicator(
-              onRefresh: _loadJournals,
-              child: ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: _journals.length,
-                itemBuilder: (context, index) {
-                  final journal = _journals[index];
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: JournalCard(
-                      journal: journal,
-                      onTap: () => _viewJournalDetails(journal),
-                    ),
-                  );
-                },
-              ),
-            ),
+            );
+          },
+        ),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: _createNewJournal,
         backgroundColor: const Color(0xFF1E201E),

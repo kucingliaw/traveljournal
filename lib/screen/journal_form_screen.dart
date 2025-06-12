@@ -5,6 +5,9 @@ import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:traveljournal/services/journal_service.dart';
 import 'package:traveljournal/models/journal.dart';
+import 'package:traveljournal/utils/validation_helper.dart';
+import 'package:traveljournal/widgets/loading_display.dart';
+import 'package:traveljournal/services/location_service.dart';
 
 class JournalFormScreen extends StatefulWidget {
   final Journal? journal; // If provided, we're editing an existing journal
@@ -121,14 +124,10 @@ class _JournalFormScreenState extends State<JournalFormScreen> {
   }
 
   Future<void> _getCurrentLocation() async {
-    final hasPermission = await _handleLocationPermission();
-    if (!hasPermission) return;
+    final position = await LocationService.getCurrentLocation(context);
+    if (position == null) return;
 
     try {
-      final position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
-
       final placemarks = await placemarkFromCoordinates(
         position.latitude,
         position.longitude,
@@ -242,7 +241,7 @@ class _JournalFormScreenState extends State<JournalFormScreen> {
         ),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const LoadingDisplay(message: 'Saving journal...')
           : SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Form(
@@ -256,12 +255,7 @@ class _JournalFormScreenState extends State<JournalFormScreen> {
                         labelText: 'Title',
                         border: OutlineInputBorder(),
                       ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter a title';
-                        }
-                        return null;
-                      },
+                      validator: ValidationHelper.validateTitle,
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
@@ -272,12 +266,7 @@ class _JournalFormScreenState extends State<JournalFormScreen> {
                         alignLabelWithHint: true,
                       ),
                       maxLines: 5,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter some content';
-                        }
-                        return null;
-                      },
+                      validator: ValidationHelper.validateContent,
                     ),
                     const SizedBox(height: 16),
                     ElevatedButton.icon(

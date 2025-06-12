@@ -5,7 +5,10 @@ import 'package:traveljournal/services/profile_service.dart';
 import 'package:traveljournal/auth/auth_service.dart';
 import 'package:traveljournal/models/user_profile.dart';
 import 'package:traveljournal/screen/login_screen.dart';
+import 'package:traveljournal/screen/preferences_screen.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:traveljournal/widgets/loading_display.dart';
+import 'package:traveljournal/widgets/error_display.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -253,7 +256,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
         elevation: 0,
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const LoadingDisplay(message: 'Loading profile...')
+          : _profile == null
+          ? ErrorDisplay(
+              message: 'Could not load profile',
+              onRetry: _loadProfile,
+            )
           : SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -270,7 +278,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           color: Colors.grey[200],
                         ),
                         clipBehavior: Clip.antiAlias,
-                        child: _buildProfileImage(),
+                        child: _isSaving
+                            ? const LoadingDisplay()
+                            : _buildProfileImage(),
                       ),
                       if (!_isSaving)
                         Positioned(
@@ -334,17 +344,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
+                  OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const PreferencesScreen(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.settings),
+                    label: const Text('Travel Preferences'),
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size(double.infinity, 48),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                   OutlinedButton(
                     onPressed: _signOut,
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.red,
                       side: const BorderSide(color: Colors.red),
+                      minimumSize: const Size(double.infinity, 48),
                     ),
-                    child: const SizedBox(
-                      width: double.infinity,
-                      child: Center(child: Text('Sign Out')),
-                    ),
+                    child: const Text('Sign Out'),
                   ),
                 ],
               ),

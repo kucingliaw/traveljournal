@@ -2,9 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:traveljournal/screen/splashscreen.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:traveljournal/services/connectivity_service.dart';
+import 'package:traveljournal/services/local_database_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize local database
+  await LocalDatabaseService().database;
+
   // Supabase initialization
   await Supabase.initialize(
     url: 'https://wynhgeabjnkycotojqqs.supabase.co',
@@ -15,10 +21,34 @@ void main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  final ConnectivityService _connectivityService = ConnectivityService();
+
+  @override
+  void initState() {
+    super.initState();
+    _connectivityService.connectionStatusController.stream.listen((
+      isConnected,
+    ) {
+      if (context.mounted) {
+        _connectivityService.showConnectivitySnackBar(context, isConnected);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _connectivityService.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -55,7 +85,7 @@ class MyApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: SplashScreen(),
+      home: const SplashScreen(),
     );
   }
 }

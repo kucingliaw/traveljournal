@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traveljournal/auth/auth_service.dart';
 import 'package:traveljournal/screen/signup_screen.dart';
+import 'package:traveljournal/screen/homescreen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -16,21 +17,47 @@ class _LoginScreenState extends State<LoginScreen> {
   // Controllers for email and password input
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  String _getLoginErrorMessage(String error) {
+    if (error.contains('password_incorrect')) {
+      return 'Incorrect password';
+    } else if (error.contains('account_not_found')) {
+      return 'Account not found';
+    } else {
+      return 'Login failed, please try again';
+    }
+  }
 
   // Login button handler
   void login() async {
     final email = _emailController.text;
-    final password = _passwordController.text;
-
-    // Attempt to sign in with email and password
+    final password =
+        _passwordController.text; // Attempt to sign in with email and password
     try {
       await authService.signInWithEmailPassword(email, password);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Login successful!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        // Navigate to home screen after short delay
+        Future.delayed(const Duration(milliseconds: 500), () {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+          );
+        });
+      }
     } catch (e) {
       // Handle login error
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Login failed: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(_getLoginErrorMessage(e.toString())),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     }
   }

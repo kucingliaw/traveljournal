@@ -16,30 +16,47 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  String _getSignUpErrorMessage(String error) {
+    if (error.contains('email_registered')) {
+      return 'Email is already registered';
+    } else {
+      return 'Registration failed, please try again';
+    }
+  }
 
   // Sign up button handler
   void signUp() async {
     final email = _emailController.text;
     final password = _passwordController.text;
-    final confirmPassword = _confirmPasswordController.text;
-
-    // Check if passwords match
+    final confirmPassword =
+        _confirmPasswordController.text; // Check if passwords match
     if (password != confirmPassword) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Passwords do not match')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Passwords do not match'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
       return;
-    } // Attempt to sign up with email and password
+    }
+
+    // Attempt to sign up with email and password
     try {
       await authService.signUpWithEmailPassword(email, password);
       if (mounted) {
-        // Show success message
+        // Clear the text fields
+        _emailController.clear();
+        _passwordController.clear();
+        _confirmPasswordController.clear(); // Show success message
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Account created successfully! Please login.'),
+            content: Text(
+              'Registration successful! Please login with your new account.',
+            ),
             backgroundColor: Colors.green,
+            duration: Duration(seconds: 3),
           ),
         );
         // Navigate back to login screen after a short delay
@@ -52,7 +69,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Sign up failed: $e'),
+            content: Text(_getSignUpErrorMessage(e.toString())),
             backgroundColor: Colors.red,
           ),
         );

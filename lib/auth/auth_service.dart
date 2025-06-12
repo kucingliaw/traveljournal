@@ -15,7 +15,13 @@ class AuthService {
       );
       return response;
     } catch (e) {
-      throw Exception('Failed to sign in: $e');
+      if (e.toString().contains('Invalid login credentials')) {
+        throw Exception('password_incorrect');
+      } else if (e.toString().contains('not found')) {
+        throw Exception('account_not_found');
+      } else {
+        throw Exception('login_failed');
+      }
     }
   }
 
@@ -29,9 +35,15 @@ class AuthService {
         email: email,
         password: password,
       );
+      // Sign out immediately to prevent auto-login
+      await _supabase.auth.signOut();
       return response;
     } catch (e) {
-      throw Exception('Failed to sign up: $e');
+      if (e.toString().contains('already registered')) {
+        throw Exception('email_registered');
+      } else {
+        throw Exception('signup_failed');
+      }
     }
   }
 

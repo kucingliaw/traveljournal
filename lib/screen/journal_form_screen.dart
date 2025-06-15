@@ -178,20 +178,10 @@ class _JournalFormScreenState extends State<JournalFormScreen> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        toolbarHeight: kToolbarHeight + 24,
+        elevation: 0,
         centerTitle: true,
-        leading: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12.0),
-          child: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () => Navigator.pop(context),
-          ),
-        ),
-        title: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12.0),
-          child: Text(
-            widget.journal == null ? 'New Journal Entry' : 'Edit Journal Entry',
-          ),
+        title: Text(
+          widget.journal == null ? 'New Journal Entry' : 'Edit Journal Entry',
         ),
       ),
       body: _isLoading

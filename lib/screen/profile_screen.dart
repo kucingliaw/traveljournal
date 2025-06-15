@@ -250,10 +250,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Profile'),
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.white,
         elevation: 0,
+        title: const Text('Profile'),
+        iconTheme: const IconThemeData(color: Colors.black),
       ),
       body: _isLoading
           ? const LoadingDisplay(message: 'Loading profile...')

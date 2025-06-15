@@ -84,6 +84,24 @@ class _CustomAppBarState extends State<CustomAppBar> {
     );
   }
 
+  Widget _buildProfileImage() {
+    return CachedNetworkImage(
+      imageUrl: _profile!.avatarUrl!,
+      imageBuilder: (context, imageProvider) =>
+          CircleAvatar(backgroundImage: imageProvider, radius: 16),
+      placeholder: (context, url) => const Center(
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+          valueColor: AlwaysStoppedAnimation<Color>(Colors.grey),
+        ),
+      ),
+      errorWidget: (context, url, error) {
+        print('Error loading profile image: $error from URL: $url');
+        return const Icon(Icons.person, size: 24, color: Colors.grey);
+      },
+    );
+  }
+
   void _handleLogout(BuildContext context) async {
     try {
       await widget.authService.signOut();
@@ -117,78 +135,81 @@ class _CustomAppBarState extends State<CustomAppBar> {
     return AppBar(
       backgroundColor: Colors.white,
       elevation: 0,
-      centerTitle: true,
-      leadingWidth: 68,
       toolbarHeight: kToolbarHeight + 24,
-      leading: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12.0),
-        child: GestureDetector(
-          onTap: () => _navigateToProfile(context),
-          child: Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.grey[200],
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: _buildAvatar(),
-          ),
-        ),
-      ),
-      title: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12.0),
-        child: Text(
-          'Hi, ${_profile?.username ?? widget.userEmail.split('@')[0]}',
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
-      ),
-      actions: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
-          child: PopupMenuButton<String>(
-            icon: const Icon(Icons.menu),
-            onSelected: (value) {
-              switch (value) {
-                case 'profile':
-                  _navigateToProfile(context);
-                  break;
-                case 'logout':
-                  _handleLogout(context);
-                  break;
-              }
-            },
-            itemBuilder: (BuildContext context) => [
-              PopupMenuItem<String>(
-                value: 'profile',
-                child: Row(
+      title: Row(
+        children: [
+          GestureDetector(
+            onTap: () => _navigateToProfile(context),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.grey[200],
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: _profile?.avatarUrl != null
+                      ? _buildProfileImage()
+                      : const Icon(Icons.person, color: Colors.grey),
+                ),
+                const SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.person, size: 20),
-                    const SizedBox(width: 8),
                     Text(
-                      'Profile',
-                      style: Theme.of(context).textTheme.bodyMedium,
+                      'Hi, ${_profile?.username ?? widget.userEmail.split('@')[0]}!',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      'Welcome back',
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
                     ),
                   ],
                 ),
+              ],
+            ),
+          ),
+          const Spacer(),
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert),
+            onSelected: (value) {
+              if (value == 'profile') {
+                _navigateToProfile(context);
+              } else if (value == 'logout') {
+                _handleLogout(context);
+              }
+            },
+            itemBuilder: (BuildContext context) => [
+              const PopupMenuItem<String>(
+                value: 'profile',
+                child: Row(
+                  children: [
+                    Icon(Icons.person),
+                    SizedBox(width: 8),
+                    Text('Profile'),
+                  ],
+                ),
               ),
-              PopupMenuItem<String>(
+              const PopupMenuItem<String>(
                 value: 'logout',
                 child: Row(
                   children: [
-                    const Icon(Icons.logout, size: 20),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Logout',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
+                    Icon(Icons.logout),
+                    SizedBox(width: 8),
+                    Text('Sign Out'),
                   ],
                 ),
               ),
             ],
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

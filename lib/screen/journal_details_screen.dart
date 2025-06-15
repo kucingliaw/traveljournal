@@ -85,18 +85,15 @@ class _JournalDetailsScreenState extends State<JournalDetailsScreen> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        toolbarHeight: kToolbarHeight + 24,
+        elevation: 0,
         centerTitle: true,
+        title: const Text('Journal Details'),
         leading: Padding(
           padding: const EdgeInsets.symmetric(vertical: 12.0),
           child: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () => Navigator.pop(context),
           ),
-        ),
-        title: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12.0),
-          child: const Text('Journal Details'),
         ),
         actions: [
           Padding(

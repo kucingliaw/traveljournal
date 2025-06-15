@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:path/path.dart' as path;
-import '../models/user_profile.dart';
+import 'package:traveljournal/features/profile/models/user_profile.dart';
 
 class ProfileService {
   final SupabaseClient _supabase = Supabase.instance.client;
@@ -18,10 +18,8 @@ class ProfileService {
           .eq('id', user.id)
           .single();
 
-      print('Profile response from DB: $response'); // Debug log
       return UserProfile.fromJson(response);
     } catch (e) {
-      print('Error getting profile: $e'); // Debug log
       throw Exception('Failed to get profile');
     }
   }
@@ -37,8 +35,6 @@ class ProfileService {
 
       String? avatarUrl;
       if (avatarFile != null) {
-        print('Starting avatar upload process...'); // Debug log
-
         try {
           // Delete old avatar if exists
           final currentProfile = await getProfile();
@@ -53,11 +49,9 @@ class ProfileService {
               // Then try to delete the old file
               final oldUri = Uri.parse(currentProfile!.avatarUrl!);
               final oldFileName = path.basename(oldUri.path);
-              print('Removing old avatar: $oldFileName'); // Debug log
               await _supabase.storage.from('avatars').remove([oldFileName]);
-              print('Successfully removed old avatar'); // Debug log
             } catch (e) {
-              print('Error removing old avatar: $e'); // Non-critical error
+              // Non-critical error
             }
           }
 
@@ -65,8 +59,6 @@ class ProfileService {
           final fileExt = path.extension(avatarFile.path).toLowerCase();
           final timestamp = DateTime.now().millisecondsSinceEpoch;
           final fileName = 'avatar_${timestamp}_${user.id}$fileExt';
-
-          print('Uploading new avatar: $fileName'); // Debug log
 
           // Upload new avatar
           await _supabase.storage
@@ -80,16 +72,12 @@ class ProfileService {
                 ),
               );
 
-          print('Successfully uploaded avatar file'); // Debug log
-
           // Get public URL
           avatarUrl = _supabase.storage.from('avatars').getPublicUrl(fileName);
-          print('Generated avatar URL: $avatarUrl'); // Debug log
 
           // Wait a moment for storage propagation
           await Future.delayed(const Duration(milliseconds: 500));
         } catch (e) {
-          print('Error in avatar upload process: $e');
           throw Exception('Failed to upload avatar');
         }
       }
@@ -103,8 +91,6 @@ class ProfileService {
         'updated_at': DateTime.now().toIso8601String(),
       };
 
-      print('Upserting profile with data: $updates'); // Debug log
-
       // Upsert the profile
       final response = await _supabase
           .from('profiles')
@@ -112,16 +98,10 @@ class ProfileService {
           .select()
           .single();
 
-      print('Profile upsert response: $response'); // Debug log
-
       final profile = UserProfile.fromJson(response);
-      print(
-        'Created UserProfile object with avatarUrl: ${profile.avatarUrl}',
-      ); // Debug log
 
       return profile;
     } catch (e) {
-      print('Error in upsertProfile: $e'); // Debug log
       throw Exception('Failed to update profile');
     }
   }
@@ -145,14 +125,11 @@ class ProfileService {
       try {
         final uri = Uri.parse(profile!.avatarUrl!);
         final fileName = path.basename(uri.path);
-        print('Deleting avatar file: $fileName'); // Debug log
         await _supabase.storage.from('avatars').remove([fileName]);
-        print('Successfully deleted avatar file'); // Debug log
       } catch (e) {
-        print('Error deleting avatar file: $e'); // Non-critical error
+        // Non-critical error
       }
     } catch (e) {
-      print('Error in deleteAvatar: $e'); // Debug log
       throw Exception('Failed to delete avatar');
     }
   }

@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:traveljournal/services/journal_service.dart';
-import 'package:traveljournal/models/journal.dart';
+import 'package:traveljournal/features/journal/models/journal.dart';
 import 'package:traveljournal/utils/validation_helper.dart';
 import 'package:traveljournal/widgets/loading_display.dart';
 import 'package:traveljournal/services/location_service.dart';
+import 'package:traveljournal/utils/ui_helper.dart';
 
 class JournalFormScreen extends StatefulWidget {
   final Journal? journal; // If provided, we're editing an existing journal
@@ -67,12 +68,7 @@ class _JournalFormScreenState extends State<JournalFormScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to pick image: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        showErrorSnackbar(context, 'Failed to pick image: $e');
       }
     }
   }
@@ -131,12 +127,7 @@ class _JournalFormScreenState extends State<JournalFormScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to get location: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        showErrorSnackbar(context, 'Failed to get location: $e');
       }
     }
   }
@@ -172,32 +163,122 @@ class _JournalFormScreenState extends State<JournalFormScreen> {
       }
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              widget.journal == null
-                  ? 'Journal created successfully!'
-                  : 'Journal updated successfully!',
-            ),
-            backgroundColor: Colors.green,
-          ),
+        showSuccessSnackbar(
+          context,
+          widget.journal == null
+              ? 'Journal created successfully!'
+              : 'Journal updated successfully!',
         );
         Navigator.pop(context, true); // Return true to indicate success
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to save journal: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        showErrorSnackbar(context, 'Failed to save journal: $e');
       }
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
       }
     }
+  }
+
+  Widget _buildTitleField() {
+    return TextFormField(
+      controller: _titleController,
+      decoration: const InputDecoration(
+        labelText: 'Title',
+        border: OutlineInputBorder(),
+      ),
+      validator: ValidationHelper.validateTitle,
+    );
+  }
+
+  Widget _buildContentField() {
+    return TextFormField(
+      controller: _contentController,
+      decoration: const InputDecoration(
+        labelText: 'Content',
+        border: OutlineInputBorder(),
+        alignLabelWithHint: true,
+      ),
+      maxLines: 5,
+      validator: ValidationHelper.validateContent,
+    );
+  }
+
+  Widget _buildImagePicker() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ElevatedButton.icon(
+          onPressed: _showImageSourceDialog,
+          icon: const Icon(Icons.photo),
+          label: Text(
+            _imagePath == null && _currentImageUrl == null
+                ? 'Add Photo'
+                : 'Change Photo',
+          ),
+        ),
+        if (_imagePath != null) ...[
+          SizedBox(height: 8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.file(
+              File(_imagePath!),
+              height: 200,
+              width: double.infinity,
+              fit: BoxFit.cover,
+            ),
+          ),
+        ] else if (_currentImageUrl != null) ...[
+          SizedBox(height: 8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.network(
+              _currentImageUrl!,
+              height: 200,
+              width: double.infinity,
+              fit: BoxFit.cover,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildLocationPicker() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ElevatedButton.icon(
+          onPressed: _getCurrentLocation,
+          icon: const Icon(Icons.location_on),
+          label: Text(
+            _locationName == null ? 'Add Location' : 'Change Location',
+          ),
+        ),
+        if (_locationName != null) ...[
+          SizedBox(height: 8),
+          Text(
+            _locationName!,
+            style: Theme.of(context).textTheme.bodyLarge,
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildSubmitButton() {
+    return FilledButton(
+      onPressed: _saveJournal,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Text(
+          widget.journal == null ? 'Create Journal' : 'Update Journal',
+        ),
+      ),
+    );
   }
 
   @override
@@ -214,7 +295,7 @@ class _JournalFormScreenState extends State<JournalFormScreen> {
         ),
       ),
       body: _isLoading
-          ? const LoadingDisplay(message: 'Saving journal...')
+          ? LoadingDisplay(message: 'Saving journal...')
           : SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Form(
@@ -222,92 +303,19 @@ class _JournalFormScreenState extends State<JournalFormScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    TextFormField(
-                      controller: _titleController,
-                      decoration: const InputDecoration(
-                        labelText: 'Title',
-                        border: OutlineInputBorder(),
-                      ),
-                      validator: ValidationHelper.validateTitle,
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _contentController,
-                      decoration: const InputDecoration(
-                        labelText: 'Content',
-                        border: OutlineInputBorder(),
-                        alignLabelWithHint: true,
-                      ),
-                      maxLines: 5,
-                      validator: ValidationHelper.validateContent,
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton.icon(
-                      onPressed: _showImageSourceDialog,
-                      icon: const Icon(Icons.photo),
-                      label: Text(
-                        _imagePath == null && _currentImageUrl == null
-                            ? 'Add Photo'
-                            : 'Change Photo',
-                      ),
-                    ),
-                    if (_imagePath != null) ...[
-                      const SizedBox(height: 8),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Image.file(
-                          File(_imagePath!),
-                          height: 200,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ] else if (_currentImageUrl != null) ...[
-                      const SizedBox(height: 8),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Image.network(
-                          _currentImageUrl!,
-                          height: 200,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ],
-                    const SizedBox(height: 16),
-                    ElevatedButton.icon(
-                      onPressed: _getCurrentLocation,
-                      icon: const Icon(Icons.location_on),
-                      label: Text(
-                        _locationName == null
-                            ? 'Add Location'
-                            : 'Change Location',
-                      ),
-                    ),
-                    if (_locationName != null) ...[
-                      const SizedBox(height: 8),
-                      Text(
-                        _locationName!,
-                        style: Theme.of(context).textTheme.bodyLarge,
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                    const SizedBox(height: 24),
-                    FilledButton(
-                      onPressed: _saveJournal,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Text(
-                          widget.journal == null
-                              ? 'Create Journal'
-                              : 'Update Journal',
-                        ),
-                      ),
-                    ),
+                    _buildTitleField(),
+                    SizedBox(height: 16),
+                    _buildContentField(),
+                    SizedBox(height: 16),
+                    _buildImagePicker(),
+                    SizedBox(height: 16),
+                    _buildLocationPicker(),
+                    SizedBox(height: 24),
+                    _buildSubmitButton(),
                   ],
                 ),
               ),
             ),
     );
   }
-}
+} 

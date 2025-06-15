@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:traveljournal/auth/auth_gate.dart';
+import 'package:traveljournal/features/auth/presentation/auth_gate.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -90,4 +90,4 @@ class _SplashScreenState extends State<SplashScreen>
       ),
     );
   }
-}
+} 

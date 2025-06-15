@@ -48,4 +48,4 @@ class UserProfile {
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
-}
+} 

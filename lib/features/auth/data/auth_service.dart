@@ -75,4 +75,4 @@ class AuthService {
       throw Exception('Failed to get current user: $e');
     }
   }
-}
+} 

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:traveljournal/auth/auth_service.dart';
-import 'package:traveljournal/models/journal.dart';
+import 'package:traveljournal/features/auth/data/auth_service.dart';
+import 'package:traveljournal/features/journal/models/journal.dart';
 import 'package:traveljournal/services/journal_service.dart';
 import 'package:traveljournal/widgets/custom_app_bar.dart';
-import 'package:traveljournal/widgets/journal_card.dart';
-import 'package:traveljournal/screen/journal_details_screen.dart';
-import 'package:traveljournal/screen/journal_form_screen.dart';
+import 'package:traveljournal/features/journal/presentation/journal_card.dart';
+import 'package:traveljournal/features/journal/presentation/journal_details_screen.dart';
+import 'package:traveljournal/features/journal/presentation/journal_form_screen.dart';
 import 'package:traveljournal/widgets/refreshable_view.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -40,7 +40,6 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     } catch (e) {
       // Non-critical error, just log it
-      print('Error loading user data: $e');
     }
   }
 
@@ -130,4 +129,4 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-}
+} 

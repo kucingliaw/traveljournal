@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:traveljournal/models/journal.dart';
+import 'package:traveljournal/features/journal/models/journal.dart';
 
 class JournalService {
   final SupabaseClient _supabase = Supabase.instance.client;
@@ -22,7 +22,6 @@ class JournalService {
 
       return response.map<Journal>((json) => Journal.fromJson(json)).toList();
     } catch (e) {
-      print('Failed to get journals: \$e');
       throw Exception('Failed to get journals');
     }
   }
@@ -36,8 +35,9 @@ class JournalService {
       }
 
       final file = File(imagePath);
-      final fileExt = path.extension(imagePath);
-      final fileName = '${DateTime.now().toIso8601String()}_${user.id}\$fileExt';
+      path.extension(imagePath);
+      final fileName =
+          '${DateTime.now().toIso8601String()}_${user.id}\$fileExt';
 
       await _supabase.storage
           .from('journal_images')
@@ -53,7 +53,6 @@ class JournalService {
 
       return publicUrl;
     } catch (e) {
-      print('Failed to upload image: \$e');
       throw Exception('Failed to upload image');
     }
   }
@@ -70,7 +69,7 @@ class JournalService {
       final fileName = path.basename(uri.path);
       await _supabase.storage.from('journal_images').remove([fileName]);
     } catch (e) {
-      print('Error deleting image: $e');
+      // print('Error deleting image: $e');
     }
   }
 
@@ -110,7 +109,6 @@ class JournalService {
 
       return Journal.fromJson(response);
     } catch (e) {
-      print('Failed to create journal: \$e');
       throw Exception('Failed to create journal');
     }
   }
@@ -158,7 +156,6 @@ class JournalService {
 
       return Journal.fromJson(response);
     } catch (e) {
-      print('Failed to update journal: \$e');
       throw Exception('Failed to update journal');
     }
   }
@@ -181,7 +178,6 @@ class JournalService {
           .eq('id', journal.id)
           .eq('user_id', user.id); // Ensure user owns this journal
     } catch (e) {
-      print('Failed to delete journal: \$e');
       throw Exception('Failed to delete journal');
     }
   }

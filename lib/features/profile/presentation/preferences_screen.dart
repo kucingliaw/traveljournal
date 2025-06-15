@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traveljournal/services/local_database_service.dart';
-import 'package:traveljournal/auth/auth_service.dart';
+import 'package:traveljournal/features/auth/data/auth_service.dart';
+import 'package:traveljournal/utils/ui_helper.dart';
 
 class PreferencesScreen extends StatefulWidget {
   const PreferencesScreen({super.key});
@@ -71,12 +72,7 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error loading preferences: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        showErrorSnackbar(context, 'Error loading preferences: $e');
         setState(() => _isLoading = false);
       }
     }
@@ -93,29 +89,108 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
           'interests': _selectedInterests.join(','),
         });
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Preferences saved successfully'),
-              backgroundColor: Colors.green,
-            ),
-          );
+          showSuccessSnackbar(context, 'Preferences saved successfully');
           Navigator.pop(context);
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error saving preferences: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        showErrorSnackbar(context, 'Error saving preferences: $e');
       }
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
       }
     }
+  }
+
+  Widget _buildDestinationsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Preferred Destinations',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          children: _destinations.map((destination) {
+            return FilterChip(
+              label: Text(destination),
+              selected: _selectedDestinations.contains(destination),
+              onSelected: (selected) {
+                setState(() {
+                  if (selected) {
+                    _selectedDestinations.add(destination);
+                  } else {
+                    _selectedDestinations.remove(destination);
+                  }
+                });
+              },
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTravelStyleSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Travel Style',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          children: _travelStyles.map((style) {
+            return ChoiceChip(
+              label: Text(style),
+              selected: _selectedTravelStyle == style,
+              onSelected: (selected) {
+                setState(() {
+                  _selectedTravelStyle = selected ? style : '';
+                });
+              },
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInterestsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Interests',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          children: _interests.map((interest) {
+            return FilterChip(
+              label: Text(interest),
+              selected: _selectedInterests.contains(interest),
+              onSelected: (selected) {
+                setState(() {
+                  if (selected) {
+                    _selectedInterests.add(interest);
+                  } else {
+                    _selectedInterests.remove(interest);
+                  }
+                });
+              },
+            );
+          }).toList(),
+        ),
+      ],
+    );
   }
 
   @override
@@ -140,75 +215,13 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
           : ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                Text(
-                  'Preferred Destinations',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  children: _destinations.map((destination) {
-                    return FilterChip(
-                      label: Text(destination),
-                      selected: _selectedDestinations.contains(destination),
-                      onSelected: (selected) {
-                        setState(() {
-                          if (selected) {
-                            _selectedDestinations.add(destination);
-                          } else {
-                            _selectedDestinations.remove(destination);
-                          }
-                        });
-                      },
-                    );
-                  }).toList(),
-                ),
+                _buildDestinationsSection(),
                 const SizedBox(height: 24),
-                Text(
-                  'Travel Style',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  children: _travelStyles.map((style) {
-                    return ChoiceChip(
-                      label: Text(style),
-                      selected: _selectedTravelStyle == style,
-                      onSelected: (selected) {
-                        setState(() {
-                          _selectedTravelStyle = selected ? style : '';
-                        });
-                      },
-                    );
-                  }).toList(),
-                ),
+                _buildTravelStyleSection(),
                 const SizedBox(height: 24),
-                Text(
-                  'Interests',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  children: _interests.map((interest) {
-                    return FilterChip(
-                      label: Text(interest),
-                      selected: _selectedInterests.contains(interest),
-                      onSelected: (selected) {
-                        setState(() {
-                          if (selected) {
-                            _selectedInterests.add(interest);
-                          } else {
-                            _selectedInterests.remove(interest);
-                          }
-                        });
-                      },
-                    );
-                  }).toList(),
-                ),
+                _buildInterestsSection(),
               ],
             ),
     );
   }
-}
+} 

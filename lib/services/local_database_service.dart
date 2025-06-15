@@ -1,7 +1,7 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import '../models/journal.dart';
-import '../models/user_profile.dart';
+import 'package:traveljournal/features/journal/models/journal.dart';
+import 'package:traveljournal/features/profile/models/user_profile.dart';
 
 class LocalDatabaseService {
   static final LocalDatabaseService _instance =

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:traveljournal/models/journal.dart';
+import 'package:traveljournal/features/journal/models/journal.dart';
 import 'package:traveljournal/services/journal_service.dart';
-import 'package:traveljournal/screen/journal_form_screen.dart';
+import 'package:traveljournal/features/journal/presentation/journal_form_screen.dart';
+import 'package:traveljournal/utils/ui_helper.dart';
 
 class JournalDetailsScreen extends StatefulWidget {
   final Journal journal;
@@ -45,19 +46,12 @@ class _JournalDetailsScreenState extends State<JournalDetailsScreen> {
       try {
         await _journalService.deleteJournal(widget.journal);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Journal deleted successfully')),
-          );
+          showSuccessSnackbar(context, 'Journal deleted successfully');
           Navigator.pop(context, true); // Return true to trigger list refresh
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Failed to delete journal: $e'),
-              backgroundColor: Colors.red,
-            ),
-          );
+          showErrorSnackbar(context, 'Failed to delete journal: $e');
           setState(() => _isDeleting = false);
         }
       }
@@ -75,6 +69,59 @@ class _JournalDetailsScreenState extends State<JournalDetailsScreen> {
     if (updated == true && mounted) {
       Navigator.pop(context, true); // Return true to trigger list refresh
     }
+  }
+
+  Widget _buildJournalInfo(DateFormat dateFormat, DateFormat timeFormat) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            widget.journal.title,
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+          const SizedBox(height: 8),
+          if (widget.journal.locationName != null) ...[
+            Row(
+              children: [
+                const Icon(Icons.location_on, size: 16),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    widget.journal.locationName!,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+          ],
+          Row(
+            children: [
+              const Icon(Icons.calendar_today, size: 16),
+              const SizedBox(width: 4),
+              Text(
+                dateFormat.format(widget.journal.createdAt),
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const SizedBox(width: 16),
+              const Icon(Icons.access_time, size: 16),
+              const SizedBox(width: 4),
+              Text(
+                timeFormat.format(widget.journal.createdAt),
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            widget.journal.content,
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -147,56 +194,7 @@ class _JournalDetailsScreenState extends State<JournalDetailsScreen> {
                   ),
                 ),
               ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    widget.journal.title,
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                  const SizedBox(height: 8),
-                  if (widget.journal.locationName != null) ...[
-                    Row(
-                      children: [
-                        const Icon(Icons.location_on, size: 16),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            widget.journal.locationName!,
-                            style: Theme.of(context).textTheme.bodyMedium,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                  ],
-                  Row(
-                    children: [
-                      const Icon(Icons.calendar_today, size: 16),
-                      const SizedBox(width: 4),
-                      Text(
-                        dateFormat.format(widget.journal.createdAt),
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                      const SizedBox(width: 16),
-                      const Icon(Icons.access_time, size: 16),
-                      const SizedBox(width: 4),
-                      Text(
-                        timeFormat.format(widget.journal.createdAt),
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    widget.journal.content,
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                ],
-              ),
-            ),
+            _buildJournalInfo(dateFormat, timeFormat),
           ],
         ),
       ),

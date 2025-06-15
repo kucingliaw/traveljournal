@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:traveljournal/auth/auth_service.dart';
-import 'package:traveljournal/screen/signup_screen.dart';
-import 'package:traveljournal/screen/homescreen.dart';
+import 'package:traveljournal/features/auth/data/auth_service.dart';
+import 'package:traveljournal/features/auth/presentation/signup_screen.dart';
+import 'package:traveljournal/features/home/presentation/homescreen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -43,10 +43,12 @@ class _LoginScreenState extends State<LoginScreen> {
         );
         // Navigate to home screen after short delay
         Future.delayed(const Duration(milliseconds: 500), () {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const HomeScreen()),
-          );
+          if (mounted) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const HomeScreen()),
+            );
+          }
         });
       }
     } catch (e) {
@@ -130,4 +132,4 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
-}
+} 

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:traveljournal/screen/homescreen.dart';
-import 'package:traveljournal/screen/login_screen.dart';
+import 'package:traveljournal/features/home/presentation/homescreen.dart';
+import 'package:traveljournal/features/auth/presentation/login_screen.dart';
 
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
@@ -31,4 +31,4 @@ class AuthGate extends StatelessWidget {
       },
     );
   }
-}
+} 

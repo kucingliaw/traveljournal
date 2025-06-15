@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:traveljournal/models/user_profile.dart';
-import 'package:traveljournal/screen/login_screen.dart';
-import 'package:traveljournal/screen/profile_screen.dart';
-import 'package:traveljournal/auth/auth_service.dart';
+import 'package:traveljournal/features/profile/models/user_profile.dart';
+import 'package:traveljournal/features/auth/presentation/login_screen.dart';
+import 'package:traveljournal/features/profile/presentation/profile_screen.dart';
+import 'package:traveljournal/features/auth/data/auth_service.dart';
 import 'package:traveljournal/services/profile_service.dart';
 
 class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
@@ -40,12 +40,12 @@ class _CustomAppBarState extends State<CustomAppBar> {
         setState(() {
           _profile = profile;
           if (profile?.avatarUrl != null) {
-            print('Loaded avatar URL: ${profile!.avatarUrl}');
+            // print('Loaded avatar URL: ${profile!.avatarUrl}'); // Removed print statement
           }
         });
       }
     } catch (e) {
-      print('Error loading profile: $e');
+      // print('Error loading profile: $e'); // Removed print statement
     }
   }
 
@@ -61,7 +61,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
         ),
       ),
       errorWidget: (context, url, error) {
-        print('Error loading profile image: $error from URL: $url');
+        // print('Error loading profile image: $error from URL: $url'); // Removed print statement
         return const Icon(Icons.person, size: 24, color: Colors.grey);
       },
     );
@@ -91,7 +91,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
   void _navigateToProfile(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const ProfileScreen()),
+      MaterialPageRoute(builder: (context) => ProfileScreen()),
     ).then((_) => _loadProfile());
   }
 

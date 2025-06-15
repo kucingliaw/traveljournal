@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:traveljournal/auth/auth_service.dart';
+import 'package:traveljournal/features/auth/data/auth_service.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -61,7 +61,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
         );
         // Navigate back to login screen after a short delay
         Future.delayed(const Duration(seconds: 2), () {
-          Navigator.pop(context); // Go back to login screen
+          if (mounted) {
+            Navigator.pop(context); // Go back to login screen
+          }
         });
       }
     } catch (e) {
@@ -147,4 +149,4 @@ class _SignUpScreenState extends State<SignUpScreen> {
       ),
     );
   }
-}
+} 

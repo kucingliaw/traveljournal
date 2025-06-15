@@ -1,21 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:traveljournal/screen/splashscreen.dart';
+import 'package:traveljournal/features/auth/presentation/splashscreen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:traveljournal/services/connectivity_service.dart';
 import 'package:traveljournal/services/local_database_service.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Load environment variables
+  await dotenv.load();
 
   // Initialize local database
   await LocalDatabaseService().database;
 
   // Supabase initialization
   await Supabase.initialize(
-    url: 'https://wynhgeabjnkycotojqqs.supabase.co',
-    anonKey:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5bmhnZWFiam5reWNvdG9qcXFzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk2MzE5MDcsImV4cCI6MjA2NTIwNzkwN30.tx0WXSC_CVxVYeUDEqSvh4SO-LS5p33H7dtnUTV3WYQ',
+    url: dotenv.env['SUPABASE_URL']!,
+    anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
   );
 
   runApp(const MyApp());

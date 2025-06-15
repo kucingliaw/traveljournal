@@ -54,11 +54,12 @@ class LocationService {
         desiredAccuracy: LocationAccuracy.high,
       );
     } catch (e) {
+      print('Error getting location: \$e');
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error getting location: \${e.toString()}'),
-            duration: const Duration(seconds: 3),
+          const SnackBar(
+            content: Text('Failed to get location'),
+            duration: Duration(seconds: 3),
           ),
         );
       }

@@ -22,7 +22,7 @@ class ProfileService {
       return UserProfile.fromJson(response);
     } catch (e) {
       print('Error getting profile: $e'); // Debug log
-      throw Exception('Failed to get profile: $e');
+      throw Exception('Failed to get profile');
     }
   }
 
@@ -90,7 +90,7 @@ class ProfileService {
           await Future.delayed(const Duration(milliseconds: 500));
         } catch (e) {
           print('Error in avatar upload process: $e');
-          throw Exception('Failed to upload avatar: $e');
+          throw Exception('Failed to upload avatar');
         }
       }
 
@@ -122,7 +122,7 @@ class ProfileService {
       return profile;
     } catch (e) {
       print('Error in upsertProfile: $e'); // Debug log
-      throw Exception('Failed to update profile: $e');
+      throw Exception('Failed to update profile');
     }
   }
 
@@ -153,7 +153,7 @@ class ProfileService {
       }
     } catch (e) {
       print('Error in deleteAvatar: $e'); // Debug log
-      throw Exception('Failed to delete avatar: $e');
+      throw Exception('Failed to delete avatar');
     }
   }
 }

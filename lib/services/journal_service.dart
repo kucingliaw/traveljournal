@@ -22,7 +22,8 @@ class JournalService {
 
       return response.map<Journal>((json) => Journal.fromJson(json)).toList();
     } catch (e) {
-      throw Exception('Failed to get journals: $e');
+      print('Failed to get journals: \$e');
+      throw Exception('Failed to get journals');
     }
   }
 
@@ -36,7 +37,7 @@ class JournalService {
 
       final file = File(imagePath);
       final fileExt = path.extension(imagePath);
-      final fileName = '${DateTime.now().toIso8601String()}_${user.id}$fileExt';
+      final fileName = '${DateTime.now().toIso8601String()}_${user.id}\$fileExt';
 
       await _supabase.storage
           .from('journal_images')
@@ -52,7 +53,8 @@ class JournalService {
 
       return publicUrl;
     } catch (e) {
-      throw Exception('Failed to upload image: $e');
+      print('Failed to upload image: \$e');
+      throw Exception('Failed to upload image');
     }
   }
 
@@ -108,7 +110,8 @@ class JournalService {
 
       return Journal.fromJson(response);
     } catch (e) {
-      throw Exception('Failed to create journal: $e');
+      print('Failed to create journal: \$e');
+      throw Exception('Failed to create journal');
     }
   }
 
@@ -155,7 +158,8 @@ class JournalService {
 
       return Journal.fromJson(response);
     } catch (e) {
-      throw Exception('Failed to update journal: $e');
+      print('Failed to update journal: \$e');
+      throw Exception('Failed to update journal');
     }
   }
 
@@ -177,7 +181,8 @@ class JournalService {
           .eq('id', journal.id)
           .eq('user_id', user.id); // Ensure user owns this journal
     } catch (e) {
-      throw Exception('Failed to delete journal: $e');
+      print('Failed to delete journal: \$e');
+      throw Exception('Failed to delete journal');
     }
   }
 }

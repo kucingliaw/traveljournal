@@ -7,6 +7,8 @@ class ConnectivityService {
   final Connectivity _connectivity = Connectivity();
   StreamController<bool> connectionStatusController =
       StreamController<bool>.broadcast();
+  ScaffoldFeatureController<SnackBar, SnackBarClosedReason>? _snackBarController;
+  bool _lastStatus = true; // Assume online at start
 
   factory ConnectivityService() {
     return _instance;
@@ -31,22 +33,44 @@ class ConnectivityService {
   void showConnectivitySnackBar(BuildContext context, bool isConnected) {
     if (!context.mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            Icon(
-              isConnected ? Icons.wifi : Icons.wifi_off,
-              color: Colors.white,
-            ),
-            const SizedBox(width: 8),
-            Text(isConnected ? 'Back online' : 'No internet connection'),
-          ],
+    // Only react if status changed
+    if (_lastStatus == isConnected) return;
+    _lastStatus = isConnected;
+
+    // Remove previous snackbar if any
+    _snackBarController?.close();
+
+    if (!isConnected) {
+      // Show persistent red snackbar
+      _snackBarController = ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.wifi_off, color: Colors.white),
+              SizedBox(width: 8),
+              Text('No internet connection'),
+            ],
+          ),
+          backgroundColor: Colors.red,
+          duration: Duration(days: 1), // Effectively persistent
         ),
-        backgroundColor: isConnected ? Colors.green : Colors.red,
-        duration: const Duration(seconds: 3),
-      ),
-    );
+      );
+    } else {
+      // Show green snackbar for 2 seconds
+      _snackBarController = ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.wifi, color: Colors.white),
+              SizedBox(width: 8),
+              Text('Back online'),
+            ],
+          ),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   void dispose() {

@@ -84,6 +84,12 @@ class _MyAppState extends State<MyApp> {
           style: IconButton.styleFrom(foregroundColor: const Color(0xFF1E201E)),
         ),
         useMaterial3: true,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          surfaceTintColor: Colors.white,
+          scrolledUnderElevation: 0,
+        ),
       ),
       home: const SplashScreen(),
     );

@@ -125,6 +125,7 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+        surfaceTintColor: Colors.white,
         title: const Text('Travel Preferences'),
         actions: [
           if (!_isLoading)

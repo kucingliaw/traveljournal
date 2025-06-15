@@ -207,6 +207,7 @@ class _JournalFormScreenState extends State<JournalFormScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+        surfaceTintColor: Colors.white,
         centerTitle: true,
         title: Text(
           widget.journal == null ? 'New Journal Entry' : 'Edit Journal Entry',

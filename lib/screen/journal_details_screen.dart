@@ -86,6 +86,7 @@ class _JournalDetailsScreenState extends State<JournalDetailsScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+        surfaceTintColor: Colors.white,
         centerTitle: true,
         title: const Text('Journal Details'),
         leading: Padding(

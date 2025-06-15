@@ -254,6 +254,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+        surfaceTintColor: Colors.white,
         title: const Text('Profile'),
         iconTheme: const IconThemeData(color: Colors.black),
       ),

@@ -49,41 +49,6 @@ class _CustomAppBarState extends State<CustomAppBar> {
     }
   }
 
-  Widget _buildAvatar() {
-    if (_profile?.avatarUrl == null) {
-      return const Icon(Icons.person, size: 24, color: Colors.grey);
-    }
-
-    final imageUrl =
-        '${_profile!.avatarUrl!}?t=${DateTime.now().millisecondsSinceEpoch}';
-    print('Loading avatar from URL: $imageUrl');
-
-    return CachedNetworkImage(
-      imageUrl: imageUrl,
-      fit: BoxFit.cover,
-      fadeInDuration: const Duration(milliseconds: 300),
-      maxWidthDiskCache: 300,
-      maxHeightDiskCache: 300,
-      memCacheWidth: 300,
-      memCacheHeight: 300,
-      cacheKey: imageUrl
-          .split('?')
-          .first, // Cache by base URL without timestamp
-      imageBuilder: (context, imageProvider) =>
-          CircleAvatar(backgroundImage: imageProvider, radius: 16),
-      placeholder: (context, url) => const Center(
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          valueColor: AlwaysStoppedAnimation<Color>(Colors.grey),
-        ),
-      ),
-      errorWidget: (context, url, error) {
-        print('Error loading avatar: $error from URL: $url');
-        return const Icon(Icons.person, size: 24, color: Colors.grey);
-      },
-    );
-  }
-
   Widget _buildProfileImage() {
     return CachedNetworkImage(
       imageUrl: _profile!.avatarUrl!,
@@ -143,8 +108,8 @@ class _CustomAppBarState extends State<CustomAppBar> {
             child: Row(
               children: [
                 Container(
-                  width: 40,
-                  height: 40,
+                  width: 50,
+                  height: 50,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: Colors.grey[200],
@@ -177,6 +142,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
           ),
           const Spacer(),
           PopupMenuButton<String>(
+            color: Colors.white,
             icon: const Icon(Icons.more_vert),
             onSelected: (value) {
               if (value == 'profile') {

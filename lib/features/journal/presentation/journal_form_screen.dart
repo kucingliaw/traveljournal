@@ -1,13 +1,11 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:geocoding/geocoding.dart';
-import 'package:traveljournal/services/journal_service.dart';
+import 'package:traveljournal/features/journal/data/journal_service.dart';
 import 'package:traveljournal/features/journal/models/journal.dart';
 import 'package:traveljournal/utils/validation_helper.dart';
 import 'package:traveljournal/widgets/loading_display.dart';
-import 'package:traveljournal/services/location_service.dart';
 import 'package:traveljournal/utils/ui_helper.dart';
+import 'package:traveljournal/features/journal/presentation/widgets/journal_image_picker.dart';
+import 'package:traveljournal/features/journal/presentation/widgets/journal_location_picker.dart';
 
 class JournalFormScreen extends StatefulWidget {
   final Journal? journal; // If provided, we're editing an existing journal
@@ -23,7 +21,7 @@ class _JournalFormScreenState extends State<JournalFormScreen> {
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
   String? _imagePath;
-  String? _currentImageUrl; // For existing image
+  String? _currentImageUrl;
   String? _locationName;
   double? _latitude;
   double? _longitude;
@@ -49,87 +47,6 @@ class _JournalFormScreenState extends State<JournalFormScreen> {
     _titleController.dispose();
     _contentController.dispose();
     super.dispose();
-  }
-
-  Future<void> _pickImageFromSource(ImageSource source) async {
-    try {
-      final ImagePicker picker = ImagePicker();
-      final XFile? image = await picker.pickImage(
-        source: source,
-        maxWidth: 1920,
-        maxHeight: 1080,
-        imageQuality: 85,
-      );
-
-      if (image != null) {
-        setState(() {
-          _imagePath = image.path;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        showErrorSnackbar(context, 'Failed to pick image: $e');
-      }
-    }
-  }
-
-  Future<void> _showImageSourceDialog() async {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) => SafeArea(
-        child: Wrap(
-          children: [
-            ListTile(
-              leading: const Icon(Icons.camera_alt),
-              title: const Text('Take Photo'),
-              onTap: () {
-                Navigator.of(context).pop();
-                _pickImageFromSource(ImageSource.camera);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.photo_library),
-              title: const Text('Pick from Gallery'),
-              onTap: () {
-                Navigator.of(context).pop();
-                _pickImageFromSource(ImageSource.gallery);
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _getCurrentLocation() async {
-    final position = await LocationService.getCurrentLocation(context);
-    if (position == null) return;
-
-    try {
-      final placemarks = await placemarkFromCoordinates(
-        position.latitude,
-        position.longitude,
-      );
-
-      if (placemarks.isNotEmpty && mounted) {
-        final place = placemarks[0];
-        final locationName = [
-          place.locality,
-          place.administrativeArea,
-          place.country,
-        ].where((e) => e != null && e.isNotEmpty).join(', ');
-
-        setState(() {
-          _locationName = locationName;
-          _latitude = position.latitude;
-          _longitude = position.longitude;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        showErrorSnackbar(context, 'Failed to get location: $e');
-      }
-    }
   }
 
   Future<void> _saveJournal() async {
@@ -206,69 +123,6 @@ class _JournalFormScreenState extends State<JournalFormScreen> {
     );
   }
 
-  Widget _buildImagePicker() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        ElevatedButton.icon(
-          onPressed: _showImageSourceDialog,
-          icon: const Icon(Icons.photo),
-          label: Text(
-            _imagePath == null && _currentImageUrl == null
-                ? 'Add Photo'
-                : 'Change Photo',
-          ),
-        ),
-        if (_imagePath != null) ...[
-          SizedBox(height: 8),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Image.file(
-              File(_imagePath!),
-              height: 200,
-              width: double.infinity,
-              fit: BoxFit.cover,
-            ),
-          ),
-        ] else if (_currentImageUrl != null) ...[
-          SizedBox(height: 8),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Image.network(
-              _currentImageUrl!,
-              height: 200,
-              width: double.infinity,
-              fit: BoxFit.cover,
-            ),
-          ),
-        ],
-      ],
-    );
-  }
-
-  Widget _buildLocationPicker() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        ElevatedButton.icon(
-          onPressed: _getCurrentLocation,
-          icon: const Icon(Icons.location_on),
-          label: Text(
-            _locationName == null ? 'Add Location' : 'Change Location',
-          ),
-        ),
-        if (_locationName != null) ...[
-          SizedBox(height: 8),
-          Text(
-            _locationName!,
-            style: Theme.of(context).textTheme.bodyLarge,
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ],
-    );
-  }
-
   Widget _buildSubmitButton() {
     return FilledButton(
       onPressed: _saveJournal,
@@ -307,9 +161,34 @@ class _JournalFormScreenState extends State<JournalFormScreen> {
                     SizedBox(height: 16),
                     _buildContentField(),
                     SizedBox(height: 16),
-                    _buildImagePicker(),
+                    JournalImagePicker(
+                      initialImagePath: _imagePath,
+                      initialImageUrl: _currentImageUrl,
+                      onImagePathChanged: (path) {
+                        setState(() {
+                          _imagePath = path;
+                        });
+                      },
+                    ),
                     SizedBox(height: 16),
-                    _buildLocationPicker(),
+                    JournalLocationPicker(
+                      initialLocationName: _locationName,
+                      onLocationNameChanged: (name) {
+                        setState(() {
+                          _locationName = name;
+                        });
+                      },
+                      onLatitudeChanged: (lat) {
+                        setState(() {
+                          _latitude = lat;
+                        });
+                      },
+                      onLongitudeChanged: (lon) {
+                        setState(() {
+                          _longitude = lon;
+                        });
+                      },
+                    ),
                     SizedBox(height: 24),
                     _buildSubmitButton(),
                   ],
@@ -318,4 +197,4 @@ class _JournalFormScreenState extends State<JournalFormScreen> {
             ),
     );
   }
-} 
+}

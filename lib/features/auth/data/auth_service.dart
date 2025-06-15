@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:traveljournal/features/auth/data/auth_exceptions.dart'; // Import custom exceptions
 
 class AuthService {
   final SupabaseClient _supabase = Supabase.instance.client;
@@ -14,14 +15,16 @@ class AuthService {
         password: password,
       );
       return response;
-    } catch (e) {
-      if (e.toString().contains('Invalid login credentials')) {
-        throw Exception('password_incorrect');
-      } else if (e.toString().contains('not found')) {
-        throw Exception('account_not_found');
+    } on AuthException catch (e) {
+      if (e.message.contains('Invalid login credentials') || e.statusCode == '400') {
+        throw AuthPasswordIncorrectException();
+      } else if (e.message.contains('not found') || e.statusCode == '404') {
+        throw AuthAccountNotFoundException();
       } else {
-        throw Exception('login_failed');
+        throw AuthLoginFailedException(e.message);
       }
+    } catch (e) {
+      throw AuthLoginFailedException('An unexpected error occurred: ${e.toString()}');
     }
   }
 
@@ -48,12 +51,14 @@ class AuthService {
       // Sign out immediately to prevent auto-login
       await _supabase.auth.signOut();
       return response;
-    } catch (e) {
-      if (e.toString().contains('already registered')) {
-        throw Exception('email_registered');
+    } on AuthException catch (e) {
+      if (e.message.contains('already registered')) {
+        throw AuthEmailAlreadyRegisteredException();
       } else {
-        throw Exception('signup_failed');
+        throw AuthSignUpFailedException(e.message);
       }
+    } catch (e) {
+      throw AuthSignUpFailedException('An unexpected error occurred: ${e.toString()}');
     }
   }
 
@@ -62,7 +67,7 @@ class AuthService {
     try {
       await _supabase.auth.signOut();
     } catch (e) {
-      throw Exception('Failed to sign out: $e');
+      throw AuthSignOutFailedException(e.toString());
     }
   }
 
@@ -72,7 +77,7 @@ class AuthService {
       final session = _supabase.auth.currentSession;
       return session?.user;
     } catch (e) {
-      throw Exception('Failed to get current user: $e');
+      throw AuthGetCurrentUserFailedException(e.toString());
     }
   }
 } 

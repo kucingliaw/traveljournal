@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:traveljournal/services/local_database_service.dart';
+import 'package:traveljournal/features/journal/data/local_database_service.dart';
 import 'package:traveljournal/features/auth/data/auth_service.dart';
 import 'package:traveljournal/utils/ui_helper.dart';
 

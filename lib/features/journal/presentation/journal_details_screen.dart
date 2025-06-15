@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:traveljournal/features/journal/models/journal.dart';
-import 'package:traveljournal/services/journal_service.dart';
-import 'package:traveljournal/features/journal/presentation/journal_form_screen.dart';
 import 'package:traveljournal/utils/ui_helper.dart';
+import 'package:traveljournal/features/journal/data/journal_service.dart';
+import 'package:traveljournal/features/journal/presentation/journal_form_screen.dart';
 
 class JournalDetailsScreen extends StatefulWidget {
   final Journal journal;

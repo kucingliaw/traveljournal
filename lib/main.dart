@@ -3,7 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:traveljournal/features/auth/presentation/splashscreen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:traveljournal/services/connectivity_service.dart';
-import 'package:traveljournal/services/local_database_service.dart';
+import 'package:traveljournal/features/journal/data/local_database_service.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
@@ -33,6 +33,8 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final ConnectivityService _connectivityService = ConnectivityService();
+  ScaffoldFeatureController<SnackBar, SnackBarClosedReason>? _snackBarController;
+  bool _lastStatus = true; // Assume online at start
 
   @override
   void initState() {
@@ -41,7 +43,7 @@ class _MyAppState extends State<MyApp> {
       isConnected,
     ) {
       if (context.mounted) {
-        _connectivityService.showConnectivitySnackBar(context, isConnected);
+        _showConnectivitySnackBar(context, isConnected);
       }
     });
   }
@@ -50,6 +52,49 @@ class _MyAppState extends State<MyApp> {
   void dispose() {
     _connectivityService.dispose();
     super.dispose();
+  }
+
+  void _showConnectivitySnackBar(BuildContext context, bool isConnected) {
+    if (!context.mounted) return;
+
+    // Only react if status changed
+    if (_lastStatus == isConnected) return;
+    _lastStatus = isConnected;
+
+    // Remove previous snackbar if any
+    _snackBarController?.close();
+
+    if (!isConnected) {
+      // Show persistent red snackbar
+      _snackBarController = ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.wifi_off, color: Colors.white),
+              SizedBox(width: 8),
+              Text('No internet connection'),
+            ],
+          ),
+          backgroundColor: Colors.red,
+          duration: Duration(days: 1), // Effectively persistent
+        ),
+      );
+    } else {
+      // Show green snackbar for 2 seconds
+      _snackBarController = ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.wifi, color: Colors.white),
+              SizedBox(width: 8),
+              Text('Back online'),
+            ],
+          ),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   @override

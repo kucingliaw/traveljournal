@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traveljournal/features/auth/data/auth_service.dart';
 import 'package:traveljournal/features/journal/models/journal.dart';
-import 'package:traveljournal/services/journal_service.dart';
+import 'package:traveljournal/features/journal/data/journal_service.dart';
 import 'package:traveljournal/widgets/custom_app_bar.dart';
 import 'package:traveljournal/features/journal/presentation/journal_card.dart';
 import 'package:traveljournal/features/journal/presentation/journal_details_screen.dart';

@@ -100,7 +100,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Travel Journal',
+      title: 'WanderLog',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         // Set Poppins as the default font family

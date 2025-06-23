@@ -68,7 +68,7 @@ class _SplashScreenState extends State<SplashScreen>
               ),
               const SizedBox(height: 4),
               Text(
-                'Travel Journal',
+                'WanderLog',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                   color: const Color(0xFF1E201E),

@@ -7,6 +7,8 @@ import 'package:traveljournal/features/journal/presentation/journal_card.dart';
 import 'package:traveljournal/features/journal/presentation/journal_details_screen.dart';
 import 'package:traveljournal/features/journal/presentation/journal_form_screen.dart';
 import 'package:traveljournal/widgets/refreshable_view.dart';
+import 'package:traveljournal/widgets/connection_lost_screen.dart';
+import 'package:traveljournal/services/connectivity_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -18,16 +20,34 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final AuthService _authService = AuthService();
   final JournalService _journalService = JournalService();
+  final ConnectivityService _connectivityService = ConnectivityService();
   String _userEmail = '';
   List<Journal> _journals = [];
   bool _isLoading = true;
   String? _error;
+  bool _isConnected = true;
+  bool _isRetrying = false;
 
   @override
   void initState() {
     super.initState();
     _loadUserData();
-    _loadJournals();
+    if (_isConnected) {
+      _loadJournals();
+    }
+    _connectivityService.connectionStatusController.stream.listen((isConnected) {
+      if (mounted) {
+        setState(() {
+          _isConnected = isConnected;
+          if (!isConnected) {
+            _error = null;
+            _isLoading = false;
+          } else {
+            _loadJournals();
+          }
+        });
+      }
+    });
   }
 
   Future<void> _loadUserData() async {
@@ -45,6 +65,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadJournals() async {
     if (!mounted) return;
+
+    if (!_isConnected) {
+      setState(() {
+        _isLoading = false;
+        _error = null;
+      });
+      return;
+    }
 
     setState(() {
       _isLoading = true;
@@ -93,40 +121,56 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> _retryConnection() async {
+    setState(() => _isRetrying = true);
+    await _connectivityService.checkConnectionStatus();
+    await Future.delayed(const Duration(milliseconds: 800));
+    setState(() => _isRetrying = false);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: CustomAppBar(userEmail: _userEmail, authService: _authService),
-      body: RefreshableView(
-        onRefresh: _loadJournals,
-        isLoading: _isLoading,
-        errorMessage: _error,
-        emptyMessage: _journals.isEmpty
-            ? 'Start your journey by creating your first travel memory!'
-            : null,
-        onRetry: _loadJournals,
-        builder: (context) => ListView.builder(
-          padding: const EdgeInsets.all(16),
-          itemCount: _journals.length,
-          itemBuilder: (context, index) {
-            final journal = _journals[index];
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: JournalCard(
-                journal: journal,
-                onTap: () => _viewJournalDetails(journal),
-              ),
-            );
-          },
+    return Stack(
+      children: [
+        Scaffold(
+          backgroundColor: Colors.white,
+          appBar: CustomAppBar(userEmail: _userEmail, authService: _authService),
+          body: RefreshableView(
+            onRefresh: _loadJournals,
+            isLoading: _isLoading,
+            errorMessage: _isConnected ? _error : null,
+            emptyMessage: _journals.isEmpty
+                ? 'Start your journey by creating your first travel memory!'
+                : null,
+            onRetry: _loadJournals,
+            builder: (context) => ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: _journals.length,
+              itemBuilder: (context, index) {
+                final journal = _journals[index];
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: JournalCard(
+                    journal: journal,
+                    onTap: () => _viewJournalDetails(journal),
+                  ),
+                );
+              },
+            ),
+          ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: _createNewJournal,
+            backgroundColor: const Color(0xFF1E201E),
+            foregroundColor: Colors.white,
+            child: const Icon(Icons.add),
+          ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _createNewJournal,
-        backgroundColor: const Color(0xFF1E201E),
-        foregroundColor: Colors.white,
-        child: const Icon(Icons.add),
-      ),
+        if (!_isConnected)
+          ConnectionLostScreen(
+            onRetry: _retryConnection,
+            isRetrying: _isRetrying,
+          ),
+      ],
     );
   }
 } 

@@ -13,15 +13,15 @@ class ConnectivityService {
 
   ConnectivityService._internal() {
     // Initialize the connection status
-    _checkConnectionStatus();
+    checkConnectionStatus();
 
     // Listen for connectivity changes
     _connectivity.onConnectivityChanged.listen((ConnectivityResult result) {
-      _checkConnectionStatus();
+      checkConnectionStatus();
     });
   }
 
-  Future<void> _checkConnectionStatus() async {
+  Future<void> checkConnectionStatus() async {
     final ConnectivityResult result = await _connectivity.checkConnectivity();
     bool isConnected = result != ConnectivityResult.none;
     connectionStatusController.add(isConnected);
